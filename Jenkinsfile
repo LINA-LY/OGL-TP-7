@@ -4,7 +4,7 @@ stages {
 stage ('build') { // la phase build
 steps {
 
-bat 'gradle build'
+bat '.\\gradlew build'
 archiveArtifacts 'build/libs/*.jar'
 }
 }
