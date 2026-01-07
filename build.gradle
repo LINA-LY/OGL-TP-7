@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        //classpath 'com.sun.mail:javax.mail:1.6.2'
+        classpath 'com.sun.mail:javax.mail:1.6.2'
     }
 }
 
