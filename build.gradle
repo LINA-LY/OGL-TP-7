@@ -75,7 +75,7 @@ version = '1.0-SNAPSHOT'
              }
          }
      }
-*/
+
      publications {
          maven(MavenPublication) {
              groupId 'Lina'
@@ -84,6 +84,7 @@ version = '1.0-SNAPSHOT'
      }
 
 
+  */
 
 // tasks.named('sonar').configure {
 //     dependsOn test, jacocoTestReport
