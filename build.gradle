@@ -32,10 +32,10 @@ version = '1.0-SNAPSHOT'
  }*/
 
  dependencies {
-     //testImplementation 'io.cucumber:cucumber-java:6.0.0'
-     //testImplementation 'io.cucumber:cucumber-junit:6.0.0'
-     //testImplementation 'junit:junit:4.12'
-     //implementation 'com.sun.mail:javax.mail:1.6.2'
+     testImplementation 'io.cucumber:cucumber-java:6.0.0'
+     testImplementation 'io.cucumber:cucumber-junit:6.0.0'
+     testImplementation 'junit:junit:4.12'
+     implementation 'com.sun.mail:javax.mail:1.6.2'
 
  }
 
