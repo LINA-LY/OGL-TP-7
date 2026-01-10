@@ -66,23 +66,23 @@ version = '1.0-SNAPSHOT'
  }
 
 publishing {
-     repositories {
-         maven {
-             url 'https://mymavenrepo.com/repo/Ku8itCtpRPNBt0gLpKIL/'
-             credentials {
-                 username 'myMavenRepo'
-                 password 'test'
-             }
-         }
-     }
+    repositories {
+        maven {
+            url 'https://mymavenrepo.com/repo/Ku8itCtpRPNBt0gLpKIL/'
+            credentials {
+                username 'myMavenRepo'
+                password 'test'
+            }
+        }
+    }
 
-     publications {
-         maven(MavenPublication) {
-             groupId 'Lina'
-             from components.java
-         }
-     }
-
+    publications {
+        maven(MavenPublication) {
+            groupId 'Lina'
+            from components.java
+        }
+    }
+}
 
 
 
