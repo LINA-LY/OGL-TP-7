@@ -89,7 +89,7 @@ publishing {
 // tasks.named('sonar').configure {
 //     dependsOn test, jacocoTestReport
 // }
-/*
+
  task notifySlack {
      doLast {
          def webhookUrl = project.findProperty('slackWebhook') ?: System.getenv('SLACK_WEBHOOK')
@@ -191,4 +191,3 @@ La librairie a ete deployee avec succes.
  publish.finalizedBy notifySlack
 notifySlack.finalizedBy notifyEmail
 
-*/
