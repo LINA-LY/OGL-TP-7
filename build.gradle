@@ -68,7 +68,8 @@ version = '1.0-SNAPSHOT'
 publishing {
     repositories {
         maven {
-            url 'https://mymavenrepo.com/repo/Ku8itCtpRPNBt0gLpKIL/'
+            url 'https://repo1.maven.org/maven2/'
+            allowInsecureProtocol = false
             credentials {
                 username 'myMavenRepo'
                 password 'test'
