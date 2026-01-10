@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         PROJECT_NAME = 'TP7-API'
-        JAVA_TOOL_OPTIONS = '-Djavax.net.ssl.trustStoreType=Windows-ROOT'
     }
 
     stages {
