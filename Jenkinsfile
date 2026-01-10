@@ -62,9 +62,7 @@ pipeline {
 
         // ========== PHASE 3: QUALITY GATE (optionnel si SonarQube marche) ==========
         stage('Code Quality') {
-            when {
-                expression { return false } // Désactivé pour l'instant
-            }
+
             steps {
                 echo ' Vérification des Quality Gates...'
                 timeout(time: 5, unit: 'MINUTES') {
