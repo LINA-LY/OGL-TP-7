@@ -65,7 +65,7 @@ version = '1.0-SNAPSHOT'
      }
  }
 
- /* publishing {
+publishing {
      repositories {
          maven {
              url 'https://mymavenrepo.com/repo/Ku8itCtpRPNBt0gLpKIL/'
@@ -84,7 +84,7 @@ version = '1.0-SNAPSHOT'
      }
 
 
-  */
+
 
 // tasks.named('sonar').configure {
 //     dependsOn test, jacocoTestReport
