@@ -189,6 +189,6 @@ La librairie a ete deployee avec succes.
 }
 
 // Lier la notification au déploiement
- publish.finalizedBy notifySlack
+//publish.finalizedBy notifySlack
 notifySlack.finalizedBy notifyEmail
 
