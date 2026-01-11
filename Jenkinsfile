@@ -71,7 +71,7 @@ pipeline {
 
 stage('Deploy') {
     environment {
-        testF = credentials('testF')
+        SLACK_WEBHOOK_URL = credentials('SLACK_WEBHOOK_URL')
     }
     steps {
         script {
@@ -81,7 +81,7 @@ stage('Deploy') {
             def message = """
                 {"text":" Déploiement réussi !", "channel":"#general"}
             """.stripIndent()
-            bat "curl -X POST -H \"Content-Type: application/json\" -d \"${message}\" \"${env.testF}\""
+            bat "curl -X POST -H \"Content-Type: application/json\" -d \"${message}\" \"${env.SLACK_WEBHOOK_URL}\""
         }
     }
 }
