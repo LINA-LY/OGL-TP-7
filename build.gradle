@@ -89,57 +89,52 @@ publishing {
 // tasks.named('sonar').configure {
 //     dependsOn test, jacocoTestReport
 // }
-task notifySlack {
-    doLast {
-        // Récupère le webhook depuis une propriété (gradle.properties OU variable d'env)
-        def webhookUrl = project.findProperty('slackWebhook') ?: System.getenv('SLACK_WEBHOOK_URL')
+/*
+ task notifySlack {
+     doLast {
+         def webhookUrl = project.findProperty('slackWebhook') ?: System.getenv('SLACK_WEBHOOK')
 
-        if (!webhookUrl) {
-            println "️ Webhook Slack non configuré — notification ignorée"
-            return
-        }
+         if (webhookUrl) {
+             def message = """{
+                "text": "Déploiement réussi !",
+                "attachments": [{
+                    "color": "good",
+                    "fields": [
+                        {"title": "Projet", "value": "${project.name}", "short": true},
+                        {"title": "Version", "value": "${project.version}", "short": true},
+                        {"title": "Groupe", "value": "${project.group}", "short": true},
+                        {"title": "Date", "value": "${new Date()}", "short": false}
+                    ]
+                }]
+            }"""
 
-        def message = """{
-            "text": "✅ Déploiement réussi !",
-            "attachments": [{
-                "color": "good",
-                "fields": [
-                    {"title": "Projet", "value": "${project.name}", "short": true},
-                    {"title": "Version", "value": "${project.version}", "short": true},
-                    {"title": "Build", "value": "${System.getenv('BUILD_NUMBER') ?: 'local'}", "short": true},
-                    {"title": "Date", "value": "${new Date()}", "short": false}
-                ]
-            }]
-        }"""
+             def connection = new URL(webhookUrl).openConnection()
+             connection.setRequestMethod("POST")
+             connection.setDoOutput(true)
+             connection.setRequestProperty("Content-Type", "application/json")
 
-        try {
-            def connection = new URL(webhookUrl).openConnection()
-            connection.setRequestMethod("POST")
-            connection.setDoOutput(true)
-            connection.setRequestProperty("Content-Type", "application/json")
+             connection.outputStream.withWriter { writer ->
+                 writer.write(message)
+             }
 
-            connection.outputStream.withWriter { writer ->
-                writer.write(message)
-            }
-
-            def responseCode = connection.responseCode
-            if (responseCode == 200) {
-                println " Notification Slack envoyée avec succès"
-            } else {
-                println " Erreur Slack (${responseCode}): ${connection.errorStream?.text}"
-            }
-        } catch (Exception e) {
-            println " Erreur lors de l'envoi Slack: ${e.message}"
-        }
-    }
-}
-
+             def responseCode = connection.responseCode
+             if (responseCode == 200) {
+                 println "Notification Slack envoyée avec succès"
+             } else {
+                 println "Erreur lors de l'envoi de la notification Slack: ${responseCode}"
+             }
+         } else {
+             println "Webhook Slack non configuré"
+         }
+     }
+ }
+*/
 
 task notifyEmail {
     doLast {
         def emailTo = project.findProperty('emailTo') ?: System.getenv('EMAIL_TO')
         def emailFrom = project.findProperty('emailFrom') ?: System.getenv('EMAIL_FROM')
-        def emailPassword = (project.findProperty('emailPassword') ?: System.getenv('EMAIL_PASSWORD'))?.replaceAll("\\s+", "")
+        def emailPassword = project.findProperty('emailPassword') ?: System.getenv('EMAIL_PASSWORD')
 
         if (!emailTo || !emailFrom || !emailPassword) {
             println "Configuration email incomplete"
@@ -194,6 +189,6 @@ La librairie a ete deployee avec succes.
 }
 
 // Lier la notification au déploiement
-publish.finalizedBy notifySlack
+ publish.finalizedBy notifySlack
 notifySlack.finalizedBy notifyEmail
 
