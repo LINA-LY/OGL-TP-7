@@ -53,7 +53,7 @@ pipeline {
             steps {
                 echo ' Vérification des Quality Gates...'
                 timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true  // ✅ Bloquant si échec
+                    waitForQualityGate abortPipeline: true  //  Bloquant si échec
                 }
             }
         }
@@ -84,21 +84,21 @@ pipeline {
         }
     }
 
-    // ✅ UN SEUL BLOC POST — CORRIGÉ
+
     post {
         success {
-            echo '✅ Pipeline réussi !'
+            echo ' Pipeline réussi !'
 
             slackSend(
                 channel: '#general',
                 color: 'good',
-                message: "✅ Déploiement réussi !\nProjet: ${env.JOB_NAME}\nBuild: #${env.BUILD_NUMBER}\nDate: ${new Date().format('yyyy-MM-dd HH:mm')}"
+                message: " Déploiement réussi !\nProjet: ${env.JOB_NAME}\nBuild: #${env.BUILD_NUMBER}\nDate: ${new Date().format('yyyy-MM-dd HH:mm')}"
             )
 
             emailext (
-                subject: "✅ Build Réussi - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                subject: " Build Réussi - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: """
-                    <h2>✅ Build Réussi</h2>
+                    <h2> Build Réussi</h2>
                     <p><b>Projet :</b> ${env.JOB_NAME}</p>
                     <p><b>Build n° :</b> ${env.BUILD_NUMBER}</p>
                     <p><b>Date :</b> ${new Date()}</p>
@@ -110,18 +110,18 @@ pipeline {
         }
 
         failure {
-            echo '❌ Pipeline échoué !'
+            echo ' Pipeline échoué !'
 
             slackSend(
                 channel: '#general',
                 color: 'danger',
-                message: "❌ Échec du build !\nProjet: ${env.JOB_NAME}\nBuild: #${env.BUILD_NUMBER}\nLogs: ${env.BUILD_URL}"
+                message: " Échec du build !\nProjet: ${env.JOB_NAME}\nBuild: #${env.BUILD_NUMBER}\nLogs: ${env.BUILD_URL}"
             )
 
             emailext (
-                subject: "❌ Build Échoué - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                subject: " Build Échoué - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: """
-                    <h2>❌ Build Échoué</h2>
+                    <h2> Build Échoué</h2>
                     <p><b>Projet :</b> ${env.JOB_NAME}</p>
                     <p><b>Build n° :</b> ${env.BUILD_NUMBER}</p>
                     <p><b>Erreur :</b> Une ou plusieurs étapes ont échoué.</p>
