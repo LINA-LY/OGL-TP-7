@@ -8,14 +8,14 @@ pipeline {
     stages {
         stage('Clean') {
             steps {
-                echo ' Nettoyage...'
+                echo '🧹 Nettoyage...'
                 bat '.\\gradlew clean --no-daemon --refresh-dependencies'
             }
         }
 
         stage('Test') {
             steps {
-                echo ' Lancement des tests...'
+                echo '🧪 Lancement des tests...'
                 retry(2) {
                     bat '.\\gradlew test --no-daemon --refresh-dependencies'
                 }
@@ -28,7 +28,7 @@ pipeline {
                                  fileIncludePattern: '**/*.json',
                                  jsonReportDirectory: 'reports'
                     } catch (Exception e) {
-                        echo " Cucumber reports non générés: ${e.message}"
+                        echo "⚠️ Cucumber reports non générés: ${e.message}"
                     }
                 }
             }
@@ -36,14 +36,14 @@ pipeline {
 
         stage('Code Analysis') {
             steps {
-                echo ' Analyse du code avec SonarQube...'
+                echo '🔍 Analyse du code avec SonarQube...'
                 script {
                     try {
                         withSonarQubeEnv('SonarQube') {
                             bat '.\\gradlew sonarqube --no-daemon'
                         }
                     } catch (Exception e) {
-                        echo " SonarQube analysis failed: ${e.message}"
+                        echo "⚠️ SonarQube analysis failed: ${e.message}"
                     }
                 }
             }
@@ -51,58 +51,57 @@ pipeline {
 
         stage('Code Quality') {
             steps {
-                echo ' Vérification des Quality Gates...'
+                echo '⏳ Vérification des Quality Gates...'
                 timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true  // ✅ Bloquant si échec
+                    waitForQualityGate abortPipeline: true
                 }
             }
         }
 
         stage('Build') {
             steps {
-                echo ' Construction du projet...'
+                echo '🔨 Construction du projet...'
                 bat '.\\gradlew build -x test --no-daemon'
                 bat '.\\gradlew javadoc --no-daemon'
                 archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true
                 archiveArtifacts artifacts: 'build/docs/**/*', fingerprint: true
-                echo ' Build terminé'
+                echo '✅ Build terminé'
             }
         }
 
         stage('Deploy') {
             steps {
-                echo ' Déploiement...'
+                echo '🚀 Déploiement...'
                 script {
                     try {
                         bat '.\\gradlew publish --no-daemon'
-                        echo ' Déploiement réussi'
+                        echo '✅ Déploiement réussi'
                     } catch (Exception e) {
-                        echo " Deploy failed: ${e.message}"
+                        echo "⚠️ Deploy failed: ${e.message}"
                     }
                 }
             }
         }
     }
 
-    //  UN SEUL BLOC POST — CORRIG
     post {
         success {
-            echo ' Pipeline réussi !'
+            echo '✅ Pipeline réussi !'
 
+            // Notification Slack (utilise la config Jenkins)
             slackSend(
-                channel: '#general',
                 color: 'good',
-                message: " Déploiement réussi !\nProjet: ${env.JOB_NAME}\nBuild: #${env.BUILD_NUMBER}\nDate: ${new Date().format('yyyy-MM-dd HH:mm')}"
+                message: "✅ Déploiement réussi !\nProjet: ${env.JOB_NAME}\nBuild: #${env.BUILD_NUMBER}"
             )
 
+            // Email
             emailext (
-                subject: " Build Réussi - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                subject: "✅ Build Réussi - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: """
-                    <h2> Build Réussi</h2>
+                    <h2>✅ Build Réussi</h2>
                     <p><b>Projet :</b> ${env.JOB_NAME}</p>
                     <p><b>Build n° :</b> ${env.BUILD_NUMBER}</p>
-                    <p><b>Date :</b> ${new Date()}</p>
-                    <p><a href="${env.BUILD_URL}">Voir les détails du build</a></p>
+                    <p><a href="${env.BUILD_URL}">Voir les détails</a></p>
                 """,
                 to: 'ml_hamadache@esi.dz',
                 mimeType: 'text/html'
@@ -110,22 +109,18 @@ pipeline {
         }
 
         failure {
-            echo ' Pipeline échoué !'
+            echo '❌ Pipeline échoué !'
 
             slackSend(
-                channel: '#general',
                 color: 'danger',
-                message: " Échec du build !\nProjet: ${env.JOB_NAME}\nBuild: #${env.BUILD_NUMBER}\nLogs: ${env.BUILD_URL}"
+                message: "❌ Build échoué !\nProjet: ${env.JOB_NAME}\nBuild: #${env.BUILD_NUMBER}\nLogs: ${env.BUILD_URL}console"
             )
 
             emailext (
-                subject: " Build Échoué - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                subject: "❌ Build Échoué - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: """
-                    <h2> Build Échoué</h2>
-                    <p><b>Projet :</b> ${env.JOB_NAME}</p>
-                    <p><b>Build n° :</b> ${env.BUILD_NUMBER}</p>
-                    <p><b>Erreur :</b> Une ou plusieurs étapes ont échoué.</p>
-                    <p><a href="${env.BUILD_URL}console">Voir les logs complets</a></p>
+                    <h2>❌ Build Échoué</h2>
+                    <p><a href="${env.BUILD_URL}console">Voir les logs</a></p>
                 """,
                 to: 'ml_hamadache@esi.dz',
                 mimeType: 'text/html'
