@@ -69,36 +69,59 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-            steps {
-                echo ' Déploiement...'
-                script {
-                    try {
-                        bat '.\\gradlew publish --no-daemon'
-                        echo ' Déploiement réussi'
-                    } catch (Exception e) {
-                        echo " Deploy failed: ${e.message}"
-                    }
+    stage('Deploy') {
+        steps {
+            echo ' Déploiement...'
+            script {
+                try {
+                    bat '.\\gradlew publish --no-daemon'
+                    echo ' Déploiement réussi'
+
+                    //  Notification Slack via curl (fonctionne partout)
+                    def webhook = 'https://hooks.slack.com/services/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'
+                    def message = """
+                        {
+                          "text": " Déploiement réussi !",
+                          "attachments": [
+                            {
+                              "color": "good",
+                              "fields": [
+                                {"title": "Projet", "value": "${env.JOB_NAME}", "short": true},
+                                {"title": "Build", "value": "#${env.BUILD_NUMBER}", "short": true},
+                                {"title": "Date", "value": "${new Date().format('yyyy-MM-dd HH:mm')}", "short": false}
+                              ]
+                            }
+                          ]
+                        }
+                    """.stripIndent()
+
+                    // Échapper les guillemets pour Windows CMD
+                    def escapedMessage = message.replace('"', '\\"')
+                    bat "curl -X POST -H \"Content-Type: application/json\" -d \"${escapedMessage}\" \"${webhook}\""
+
+                } catch (Exception e) {
+                    echo " Deploy or Slack failed: ${e.message}"
                 }
             }
         }
     }
+    }
 
-    // ✅ UN SEUL BLOC POST — CORRIGÉ
+
     post {
         success {
-            echo '✅ Pipeline réussi !'
+            echo ' Pipeline réussi !'
 
             slackSend(
                 channel: '#general',
                 color: 'good',
-                message: "✅ Déploiement réussi !\nProjet: ${env.JOB_NAME}\nBuild: #${env.BUILD_NUMBER}\nDate: ${new Date().format('yyyy-MM-dd HH:mm')}"
+                message: " Déploiement réussi !\nProjet: ${env.JOB_NAME}\nBuild: #${env.BUILD_NUMBER}\nDate: ${new Date().format('yyyy-MM-dd HH:mm')}"
             )
 
             emailext (
-                subject: "✅ Build Réussi - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                subject: " Build Réussi - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: """
-                    <h2>✅ Build Réussi</h2>
+                    <h2> Build Réussi</h2>
                     <p><b>Projet :</b> ${env.JOB_NAME}</p>
                     <p><b>Build n° :</b> ${env.BUILD_NUMBER}</p>
                     <p><b>Date :</b> ${new Date()}</p>
@@ -110,18 +133,18 @@ pipeline {
         }
 
         failure {
-            echo '❌ Pipeline échoué !'
+            echo ' Pipeline échoué !'
 
             slackSend(
                 channel: '#general',
                 color: 'danger',
-                message: "❌ Échec du build !\nProjet: ${env.JOB_NAME}\nBuild: #${env.BUILD_NUMBER}\nLogs: ${env.BUILD_URL}"
+                message: " Échec du build !\nProjet: ${env.JOB_NAME}\nBuild: #${env.BUILD_NUMBER}\nLogs: ${env.BUILD_URL}"
             )
 
             emailext (
-                subject: "❌ Build Échoué - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                subject: " Build Échoué - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: """
-                    <h2>❌ Build Échoué</h2>
+                    <h2> Build Échoué</h2>
                     <p><b>Projet :</b> ${env.JOB_NAME}</p>
                     <p><b>Build n° :</b> ${env.BUILD_NUMBER}</p>
                     <p><b>Erreur :</b> Une ou plusieurs étapes ont échoué.</p>
