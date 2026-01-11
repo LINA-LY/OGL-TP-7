@@ -139,7 +139,7 @@ task notifyEmail {
     doLast {
         def emailTo = project.findProperty('emailTo') ?: System.getenv('EMAIL_TO')
         def emailFrom = project.findProperty('emailFrom') ?: System.getenv('EMAIL_FROM')
-        def emailPassword = project.findProperty('emailPassword') ?: System.getenv('EMAIL_PASSWORD')
+        def emailPassword = (project.findProperty('emailPassword') ?: System.getenv('EMAIL_PASSWORD'))?.replaceAll("\\s+", "")
 
         if (!emailTo || !emailFrom || !emailPassword) {
             println "Configuration email incomplete"
