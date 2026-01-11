@@ -69,42 +69,22 @@ pipeline {
             }
         }
 
-    stage('Deploy') {
-        steps {
-            echo ' Déploiement...'
-            script {
-                try {
-                    bat '.\\gradlew publish --no-daemon'
-                    echo ' Déploiement réussi'
+stage('Deploy') {
+    environment {
+        testF = credentials('testF')
+    }
+    steps {
+        script {
+            bat '.\\gradlew publish --no-daemon'
 
-                    //  Notification Slack via curl (fonctionne partout)
-                    def webhook = 'https://hooks.slack.com/services/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'
-                    def message = """
-                        {
-                          "text": " Déploiement réussi !",
-                          "attachments": [
-                            {
-                              "color": "good",
-                              "fields": [
-                                {"title": "Projet", "value": "${env.JOB_NAME}", "short": true},
-                                {"title": "Build", "value": "#${env.BUILD_NUMBER}", "short": true},
-                                {"title": "Date", "value": "${new Date().format('yyyy-MM-dd HH:mm')}", "short": false}
-                              ]
-                            }
-                          ]
-                        }
-                    """.stripIndent()
-
-                    // Échapper les guillemets pour Windows CMD
-                    def escapedMessage = message.replace('"', '\\"')
-                    bat "curl -X POST -H \"Content-Type: application/json\" -d \"${escapedMessage}\" \"${webhook}\""
-
-                } catch (Exception e) {
-                    echo " Deploy or Slack failed: ${e.message}"
-                }
-            }
+            // Notification Slack via curl
+            def message = """
+                {"text":" Déploiement réussi !", "channel":"#general"}
+            """.stripIndent()
+            bat "curl -X POST -H \"Content-Type: application/json\" -d \"${message}\" \"${env.testF}\""
         }
     }
+}
     }
 
 
