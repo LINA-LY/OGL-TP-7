@@ -89,46 +89,51 @@ publishing {
 // tasks.named('sonar').configure {
 //     dependsOn test, jacocoTestReport
 // }
-/*
- task notifySlack {
-     doLast {
-         def webhookUrl = project.findProperty('slackWebhook') ?: System.getenv('SLACK_WEBHOOK')
+task notifySlack {
+    doLast {
+        // Récupère le webhook depuis une propriété (gradle.properties OU variable d'env)
+        def webhookUrl = project.findProperty('slackWebhook') ?: System.getenv('SLACK_WEBHOOK_URL')
 
-         if (webhookUrl) {
-             def message = """{
-                "text": "Déploiement réussi !",
-                "attachments": [{
-                    "color": "good",
-                    "fields": [
-                        {"title": "Projet", "value": "${project.name}", "short": true},
-                        {"title": "Version", "value": "${project.version}", "short": true},
-                        {"title": "Groupe", "value": "${project.group}", "short": true},
-                        {"title": "Date", "value": "${new Date()}", "short": false}
-                    ]
-                }]
-            }"""
+        if (!webhookUrl) {
+            println "️ Webhook Slack non configuré — notification ignorée"
+            return
+        }
 
-             def connection = new URL(webhookUrl).openConnection()
-             connection.setRequestMethod("POST")
-             connection.setDoOutput(true)
-             connection.setRequestProperty("Content-Type", "application/json")
+        def message = """{
+            "text": "✅ Déploiement réussi !",
+            "attachments": [{
+                "color": "good",
+                "fields": [
+                    {"title": "Projet", "value": "${project.name}", "short": true},
+                    {"title": "Version", "value": "${project.version}", "short": true},
+                    {"title": "Build", "value": "${System.getenv('BUILD_NUMBER') ?: 'local'}", "short": true},
+                    {"title": "Date", "value": "${new Date()}", "short": false}
+                ]
+            }]
+        }"""
 
-             connection.outputStream.withWriter { writer ->
-                 writer.write(message)
-             }
+        try {
+            def connection = new URL(webhookUrl).openConnection()
+            connection.setRequestMethod("POST")
+            connection.setDoOutput(true)
+            connection.setRequestProperty("Content-Type", "application/json")
 
-             def responseCode = connection.responseCode
-             if (responseCode == 200) {
-                 println "Notification Slack envoyée avec succès"
-             } else {
-                 println "Erreur lors de l'envoi de la notification Slack: ${responseCode}"
-             }
-         } else {
-             println "Webhook Slack non configuré"
-         }
-     }
- }
-*/
+            connection.outputStream.withWriter { writer ->
+                writer.write(message)
+            }
+
+            def responseCode = connection.responseCode
+            if (responseCode == 200) {
+                println " Notification Slack envoyée avec succès"
+            } else {
+                println " Erreur Slack (${responseCode}): ${connection.errorStream?.text}"
+            }
+        } catch (Exception e) {
+            println " Erreur lors de l'envoi Slack: ${e.message}"
+        }
+    }
+}
+
 
 task notifyEmail {
     doLast {
@@ -189,6 +194,6 @@ La librairie a ete deployee avec succes.
 }
 
 // Lier la notification au déploiement
-// publish.finalizedBy notifySlack
+publish.finalizedBy notifySlack
 notifySlack.finalizedBy notifyEmail
 
